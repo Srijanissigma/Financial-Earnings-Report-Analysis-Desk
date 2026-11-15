@@ -1,0 +1,17 @@
+Option A: conda 
+  cd FINANCIAL-EARNINGS-REPORT-ANALYSIS-DESK
+  conda env create -f environment.yml
+  conda activate EarningsDesk
+
+Option B: plain Python
+  cd FINANCIAL-EARNINGS-REPORT-ANALYSIS-DESK
+  pip install -r requirements.txt
+
+Then:
+  1. Open .env and replace paste_your_groq_key_here with your key from console.groq.com
+  2. python setup_check.py        (checks packages, key, and a live Groq test)
+  3. python main.py               (prints the analyst note and saves analyst_note.md)
+  4. python main.py data/your_report.txt     (run on another report)
+
+Notebook: open Financial_Earnings_Desk.ipynb and select the "Python (EarningsDesk)" kernel:
+  python -m ipykernel install --user --name EarningsDesk --display-name "Python (EarningsDesk)"

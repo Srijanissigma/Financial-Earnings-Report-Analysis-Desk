@@ -1,0 +1,74 @@
+APPLE INC. (NASDAQ: AAPL)
+Q4 FISCAL YEAR 2026 FINANCIAL EARNINGS REPORT
+Period Ended: September 26, 2026
+Release Date: November 2, 2026
+Source: Apple Inc. Q4 FY2026 Earnings Release & Form 10-K Filings (All figures in USD unless noted)
+
+================================================================================
+1. EXECUTIVE SUMMARY & HEADLINE METRICS
+================================================================================
+Apple Inc. reported record September-quarter revenue and earnings per share for its fiscal 2026 fourth quarter ended September 26, 2026.
+
+- Quarterly Revenue: $114.48 billion (reported as $114.5B), up 11.7% YoY (vs. $102.50 billion in Q4 FY2025)
+- Full-Year FY2026 Revenue: $478.83 billion, up 15.0% YoY
+- Quarterly Net Income: $30.70 billion, up 11.8% YoY
+- Full-Year FY2026 Net Income: $132.20 billion, up 18.0% YoY
+- Quarterly Diluted EPS: $2.10, up 13.5% YoY (vs. $1.85 in Q4 FY2025; beat consensus estimate of $1.98 by 6.06%)
+- Full-Year FY2026 Diluted EPS: $8.98, up 20.0% YoY
+- Quarterly Gross Margin: 47.9% (includes ~1.0 percentage point favorable impact from tariff refunds; underlying margin ~46.9% vs. 47.2% in Q4 FY2025)
+- Quarterly Operating Margin: 31.1%
+- Quarterly Dividend Declared: $0.27 per share (0.31% annualized yield; ~12% payout ratio)
+
+================================================================================
+2. REVENUE BREAKDOWN BY PRODUCT & SERVICE CATEGORY (Q4 FY2026)
+================================================================================
+Category                         Q4 FY2026 ($B)   YoY Change   % of Total Rev
+--------------------------------------------------------------------------------
+iPhone                                   $57.58       +17.0%            50.3%
+Services                                 $31.57        +9.8%            27.6%
+Mac                                      $10.79          N/A             9.4%
+Wearables, Home and Accessories           $8.30          N/A             7.2%
+iPad                                      $6.23          N/A             5.4%
+--------------------------------------------------------------------------------
+Total Net Sales                         $114.48       +11.7%           100.0%
+
+*Segment Profitability Note: Services generated approximately 44% of Apple's total gross profit in Q4 FY2026 with a segment gross margin of roughly 76%. Services growth decelerated slightly from +12.1% YoY in Q3 FY2026 to +9.8% YoY in Q4 FY2026.
+
+================================================================================
+3. GEOGRAPHIC REVENUE MIX (Q4 FY2026)
+================================================================================
+Region                           Share of Total Revenue    Notable YoY Trend
+--------------------------------------------------------------------------------
+Americas                                            43%    Core revenue anchor
+Europe                                              28%    Steady expansion
+Greater China                                       15%    +21.0% YoY growth
+Rest of Asia Pacific & Japan                        14%    Balanced demand
+--------------------------------------------------------------------------------
+
+================================================================================
+4. KEY OPERATING, CASH FLOW & BALANCE SHEET HIGHLIGHTS
+================================================================================
+- Research & Development (R&D): Rose 32.0% YoY in Q4 to $11.70 billion; full-year FY2026 R&D reached a record $45.77 billion (+32.0% YoY) driven by AI initiatives.
+- Capital Expenditures (CapEx): $9.00 billion for full-year FY2026, reflecting reliance on third-party partners for external compute capacity.
+- Free Cash Flow (FCF): $136.10 billion for full-year FY2026, up 38.0% YoY (Q4 operating cash flow declined 5.5% YoY).
+- Share Repurchases & Share Count: Diluted shares outstanding declined 1.6% during FY2026 from 14,773 million to 14,532 million, driving EPS growth (+20%) ahead of net income growth (+18%).
+- Stock-Based Compensation: $13.80 billion for FY2026 (~2.9% of total revenue).
+
+================================================================================
+5. MANAGEMENT COMMENTARY & LEADERSHIP CONTEXT
+================================================================================
+- Leadership Transition: Q4 FY2026 marked the first earnings report led by CEO John Ternus, who succeeded Tim Cook on September 1, 2026.
+- Product Cycle & Pricing: Q4 results included only eight days of initial iPhone 18 Pro sales and preceded retail availability of the new foldable iPhone Duo. Results reflected a full quarter of across-the-board price increases implemented in June 2026 (including a $100 increase on iPhones) to offset component and memory supply inflation.
+- Supply Constraints: CEO John Ternus noted ongoing supply constraints and display/component bottlenecks affecting the iPhone Duo rollout.
+
+================================================================================
+6. Q1 FY2027 FORWARD GUIDANCE & RISK FACTORS
+================================================================================
+- Q1 FY2027 (December Quarter) Revenue Growth Guidance: +7.0% to +10.0% YoY (above consensus estimate of +6.1%).
+- Q1 FY2027 Services Revenue Growth Guidance: +8.0% to +9.0% YoY.
+- Q1 FY2027 Gross Margin Guidance: 45.0% to 46.0% (below consensus estimate of 46.3%, reflecting ongoing memory price inflation and ramping AI infrastructure/R&D costs).
+- Key Risk Factors Cited: Component and memory cost inflation, supply chain constraints on newly launched hardware, and reliance on third-party providers for cloud/AI compute infrastructure.
+
+================================================================================
+END OF REPORT
+================================================================================

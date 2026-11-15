@@ -1,0 +1,11 @@
+name: EarningsDesk
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - semantic-kernel
+      - openai
+      - python-dotenv
+      - ipykernel

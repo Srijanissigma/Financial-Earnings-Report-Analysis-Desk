@@ -3,7 +3,8 @@
 A multi-agent system that converts company earnings reports into a one-page analyst note covering revenue, risks and outlook. Every financial claim is checked against extracted or code-derived figures.
 
 **Technology:** Python, Microsoft Semantic Kernel (`ChatCompletionAgent`), Groq API (`openai/gpt-oss-20b`).
-**Project Members**
+
+### **Project Members**
 Member 1
 | Registration No. | 12315412
 | Roll No. | 19

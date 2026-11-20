@@ -16,7 +16,7 @@ EDITOR_INSTRUCTIONS = (
     "You are the Editor Manager of an equity research desk. You receive verified claims from three "
     "analysts (each ends with its fact ids in brackets) plus any disagreements. Write a 3 sentence "
     "executive summary for an analyst note. Cite fact ids like [F1] after every figure, copy numbers "
-    "exactly as written, add no new numbers, and mention any disagreement. Reply with plain text only."
+    "exactly as written, add no new numbers, and mention any disagreement. Reply with ONE short paragraph of plain text, no lists."
 )
 
 
@@ -29,7 +29,9 @@ class EditorManager:
         self.analyses = []
 
     async def run(self, report: str) -> str:
-        title = report.strip().splitlines()[0]
+        generic = {"news release", "press release", "earnings release", "for immediate release"}
+        lines = [l.strip() for l in report.splitlines() if l.strip()]
+        title = next((l for l in lines if l.lower() not in generic), lines[0] if lines else "Report")[:120]
         self.store = await self.extractor.run(report, self.runner)             # step 1: extract
         add_derived(self.store)                                                # step 2: derive
         self.analyses = list(await asyncio.gather(                             # step 3: FAN-OUT
@@ -67,21 +69,26 @@ class EditorManager:
         if not self.runner.available:
             return fallback, "rules"
         body = "\n".join(f"{c.text} [{', '.join(c.fact_ids)}]" for a in self.analyses for c in a.claims)
-        text = await self.runner.ask("Editor_Manager", EDITOR_INSTRUCTIONS,
-                                     body + "\nDisagreements: " + (" ".join(dis) or "none"))
-        if not text:
-            print("[editor] no summary returned, using the template summary")
-            return fallback, "rules"
-        bad_ids = set(re.findall(r"\b[FD]\d+\b", text)) - set(self.store.by_id)
-        clean_text = re.sub(r"\[[FD]\d+(?:\s*,\s*[FD]\d+)*\]", "", text)
-        bad_nums = numbers(clean_text) - allowed_numbers(self.store.facts)
-        if bad_nums:
-            print("[editor] AI summary:", repr(text))
-            print("[editor] Unsupported numbers:", sorted(bad_nums))
-        if not bad_ids and not bad_nums:
-            return text.strip(), "llm"
-        print(f"[editor] summary rejected (unknown ids: {sorted(bad_ids)}, "
-              f"ungrounded numbers: {sorted(bad_nums)}); using the template summary")
+        msg = body + "\nDisagreements: " + (" ".join(dis) or "none")
+        # numbers allowed in the summary: figures, plus numbers already verified in the claims
+        allowed = allowed_numbers(self.store.facts) | numbers(body) | numbers(" ".join(dis))
+        for attempt in range(2):
+            text = await self.runner.ask("Editor_Manager", EDITOR_INSTRUCTIONS, msg, max_tokens=900)
+            if not text:
+                print("[editor] no summary returned, using the template summary")
+                return fallback, "rules"
+            clean = re.sub(r"(?m)^\s*(?:[-*\u2022]|\d+[.)])\s+", "", text)    # ignore list markers
+            bad_ids = set(re.findall(r"\b[FD]\d+\b", clean)) - set(self.store.by_id)
+            bad_nums = numbers(clean) - allowed
+            if not bad_ids and not bad_nums:
+                return text.strip(), "llm"
+            print(f"[editor] summary rejected (unknown ids: {sorted(bad_ids)}, ungrounded numbers: "
+                  f"{sorted(bad_nums)}) text: {text[:160]!r}")
+            msg = (body + "\nDisagreements: " + (" ".join(dis) or "none") +
+                   f"\nYour previous summary was rejected for using numbers/ids not in the claims "
+                   f"({sorted(bad_nums)} {sorted(bad_ids)}). Rewrite it as ONE short paragraph, no lists, "
+                   "using only figures that appear in the claims above.")
+        print("[editor] using the template summary")
         return fallback, "rules"
 
     async def _fan_in(self, title):
@@ -104,7 +111,9 @@ class EditorManager:
             f = self.store.by_id[i]
             L.append(f"| {i} | {f.label} | {f.display()} | {f.source} |")
         modes = ", ".join(f"{a.section}: {a.mode}" for a in self.analyses)
-        L += ["", f"_Run log: extraction: {self.store.mode} ({self.store.rejected} figures rejected by "
+        c = self.store.condensed
+        cond = f"input condensed {c[0]:,} -> {c[1]:,} chars; " if c and c[0] != c[1] else ""
+        L += ["", f"_Run log: {cond}extraction: {self.store.mode} ({self.store.rejected} figures rejected by "
                   f"verification); analysts: {modes}; editor summary: {smode}; "
                   f"ungrounded claims removed: {dropped}; model: {self.runner.model_used or 'none (offline rules)'}._"]
         return "\n".join(L)

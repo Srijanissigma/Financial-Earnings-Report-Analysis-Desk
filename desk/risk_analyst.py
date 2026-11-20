@@ -10,7 +10,7 @@ class RiskAnalyst(BaseAnalyst):
              "warnings, currency effects and any risk sentences in the report. Stance for a risk "
              "is 'negative'. Sentiment 'negative' means risk is elevated, 'positive' means low risk.")
     metrics = ["customer_conc", "inventory_growth", "inventory_gap", "revenue_yoy", "fcf_change",
-               "fx_headwind", "risk_flag"]
+               "fx_headwind", "risk_flag", "rpo_growth", "rpo_gap"]
 
     def rules(self, s) -> Analysis:
         g, c = s.get, []
@@ -25,6 +25,11 @@ class RiskAnalyst(BaseAnalyst):
         fcf = g("fcf_change")
         if fcf and fcf.value < 0:
             c.append(Claim(f"Free cash flow fell {abs(fcf.value):.1f}%.", [fcf.id], "negative"))
+        rpo, rgap = g("rpo_growth"), g("rpo_gap")
+        if rpo and yoy and rgap and rgap.value < -5:
+            c.append(Claim(f"Backlog (remaining performance obligations) grew {rpo.display()} against revenue "
+                           f"growth of {yoy.display()} ({rgap.display()} gap), so future growth may slow.",
+                           [rpo.id, yoy.id, rgap.id], "negative"))
         fx = g("fx_headwind")
         if fx:
             c.append(Claim(f"Currency created a {fx.display()} headwind.", [fx.id], "negative"))

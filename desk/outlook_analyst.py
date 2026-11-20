@@ -10,7 +10,7 @@ class OutlookAnalyst(BaseAnalyst):
              "guidance, and whether it implies acceleration or slowdown versus current results.")
     metrics = ["guide_rev_low", "guide_rev_high", "guide_rev_seq", "guide_fy_growth_low",
                "guide_fy_growth_high", "fy_vs_yoy", "guide_opm_low", "guide_opm_high",
-               "op_margin", "revenue", "revenue_yoy"]
+               "op_margin", "revenue", "revenue_yoy", "fy_rev_low", "fy_rev_high"]
 
     def rules(self, s) -> Analysis:
         g, c = s.get, []
@@ -22,6 +22,9 @@ class OutlookAnalyst(BaseAnalyst):
                 ids.append(seq.id)
                 st = "positive" if seq.value > 0 else "negative"
             c.append(Claim(txt + ".", ids, st))
+        fvl, fvh = g("fy_rev_low"), g("fy_rev_high")
+        if fvl and fvh:
+            c.append(Claim(f"Full-year revenue guidance is {fvl.display()}-{fvh.display()}.", [fvl.id, fvh.id], "neutral"))
         fl, fh, d = g("guide_fy_growth_low"), g("guide_fy_growth_high"), g("fy_vs_yoy")
         if fl and fh:
             ids, txt, st = [fl.id, fh.id], f"Full-year growth is guided to {fl.display()}-{fh.display()}", "neutral"

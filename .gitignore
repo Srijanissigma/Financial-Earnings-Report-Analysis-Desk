@@ -12,3 +12,10 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 .vscode/
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+analyst_note.md

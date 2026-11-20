@@ -51,7 +51,7 @@ class BaseAnalyst:
     async def _llm(self, store, runner, facts):
         payload = json.dumps([{"id": f.id, "label": f.label, "value": f.display(),
                                "source": f.source} for f in facts])
-        data = extract_json(await runner.ask(self.agent_name, self.instructions(), payload))
+        data = extract_json(await runner.ask(self.agent_name, self.instructions(), payload, max_tokens=1500))
         if not data:
             return None
         allowed = {f.id for f in facts}

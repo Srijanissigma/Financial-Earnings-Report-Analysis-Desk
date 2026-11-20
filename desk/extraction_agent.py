@@ -4,6 +4,7 @@ figures with the exact report sentence for each. Every figure is VERIFIED in cod
 unavailable or too few figures verify, a regex extractor is used instead."""
 import re
 
+from .condense import condense
 from .llm import extract_json
 from .models import FactStore
 
@@ -48,12 +49,22 @@ RULES = [
      r"% to " + N + "%", _num),
 ]
 META = {m: (label, unit) for m, label, unit, *_ in RULES}
+META.update({
+    "fy_rev_low": ("FY revenue guidance (low)", "USD_m"),
+    "fy_rev_high": ("FY revenue guidance (high)", "USD_m"),
+    "rpo_growth": ("Remaining performance obligations (backlog) growth YoY", "pct"),
+})
 RISK_WORDS = ["litigation", "investigation", "material weakness", "restatement",
               "impairment", "going concern", "supply chain", "recall"]
 
 
 def _norm(s: str) -> str:
-    return re.sub(r"\s+", " ", s).strip().lower()
+    """Tolerant key for matching quotes to the report. PDFs often drop the 'fi', 'fl'
+    and 'ff' ligatures ("rst quarter" for "first quarter"), so those letter pairs are
+    removed from every word on both sides before comparing (word by word, so
+    neighbouring words cannot merge into a false match)."""
+    words = re.findall(r"[a-z0-9%$.]+", s.lower())
+    return "".join(re.sub(r"ffi|ffl|ff|fi|fl", "", w) for w in words)
 
 
 def _quote_supports(value, quote) -> bool:
@@ -73,51 +84,74 @@ class ExtractionAgent:
 
     INSTRUCTIONS = (
         "You are the Extraction Agent on an equity research desk. Read the earnings report "
-        "and extract key figures as JSON ONLY, no other text:\n"
-        '{"figures":[{"metric":"<key>","value":<number>,"quote":"<exact sentence from the report>"}],'
-        '"risk_flags":[{"label":"<2-4 words>","quote":"<exact sentence from the report>"}]}\n'
-        "Allowed metric keys and units (dollar values must be in millions of USD, percentages as plain "
-        "numbers such as 12.4, EPS in dollars):\n"
+        "and extract key figures as COMPACT JSON ONLY (no spaces, no other text):\n"
+        '{"figures":[{"metric":"<key>","value":<number>,"quote":"<snippet>"}],'
+        '"risk_flags":[{"label":"<2-4 words>","quote":"<snippet>"}]}\n'
+        "quote = the SHORTEST exact snippet copied from the report (max 25 words) that contains the number. "
+        "Dollar values in millions of USD (so $18.5 billion = 18500), percentages as plain numbers "
+        "(12.4), EPS in dollars. When both GAAP and non-GAAP figures exist, use GAAP. "
+        "Year-ago values may come from table rows. For fcf_change use a negative number if cash flow fell. "
+        "Allowed metric keys:\n"
         + "\n".join(f"- {m}: {META[m][0]} [{META[m][1]}]" for m in META)
-        + "\nFor fcf_change use a negative number if free cash flow fell. "
-        "Copy the quote EXACTLY from the report. Only extract figures that are stated; never guess. "
-        "risk_flags are sentences describing litigation, supply problems, investigations, impairments etc."
+        + "\nOnly extract figures that are stated; never guess. "
+        "risk_flags: at most 5, only things that actually happened or specific stated constraints "
+        "(supply limits, concentrated customers, tariffs, charges, litigation); never generic lists of "
+        "possible factors or phrases like 'does not include the effects of future items'."
     )
 
     async def run(self, report: str, runner) -> FactStore:
         store = FactStore()
         if runner.available:
-            raw = await runner.ask(self.name, self.INSTRUCTIONS, report)
+            view, orig, kept = condense(report)
+            store.condensed = (orig, kept)
+            raw = await runner.ask(self.name, self.INSTRUCTIONS, view, max_tokens=3500)
             data = extract_json(raw)
-            if data and self._load(store, data, report) >= 5:
-                store.mode = "llm"
-                return store
+            if not raw:
+                print("[extraction] no reply from the model; using rule-based extraction")
+            elif not data:
+                print("[extraction] reply was not valid JSON (maybe cut off); using rule-based extraction")
+            else:
+                n, notes = self._load(store, data, report)
+                if n >= 5:
+                    store.mode = "llm"
+                    return store
+                print(f"[extraction] only {n} figures verified ({store.rejected} rejected, e.g. "
+                      f"{notes[:3]}); using rule-based extraction")
             store = FactStore()           # discard partial result, use rules
+            store.condensed = (orig, kept)
         self._rules(store, report)
         return store
 
-    def _load(self, store, data, report) -> int:
-        rep, seen = _norm(report), set()
+    def _load(self, store, data, report):
+        rep, seen, notes = _norm(report), set(), []
         for item in data.get("figures", []):
             try:
                 metric, value, quote = item["metric"], float(item["value"]), str(item["quote"])
             except (KeyError, TypeError, ValueError):
                 store.rejected += 1
+                notes.append("malformed item")
                 continue
-            if metric not in META or metric in seen or _norm(quote) not in rep \
-                    or not _quote_supports(value, quote):
+            if metric not in META or metric in seen:
                 store.rejected += 1
-                continue
-            seen.add(metric)
-            label, unit = META[metric]
-            store.add(metric, value, unit, label, quote.strip())
-        for item in data.get("risk_flags", [])[:6]:
+                notes.append(f"{metric}: unknown or duplicate")
+            elif not _norm(quote) or _norm(quote) not in rep:
+                store.rejected += 1
+                notes.append(f"{metric}: quote not found in report")
+            elif not _quote_supports(value, quote):
+                store.rejected += 1
+                notes.append(f"{metric}: number {value:g} not in quote")
+            else:
+                seen.add(metric)
+                label, unit = META[metric]
+                store.add(metric, value, unit, label, quote.strip())
+        for item in data.get("risk_flags", [])[:5]:
             quote = str(item.get("quote", "")) if isinstance(item, dict) else ""
             if _norm(quote) and _norm(quote) in rep:
                 store.add("risk_flag", None, "text", str(item.get("label", "risk"))[:40], quote.strip())
             else:
                 store.rejected += 1
-        return len(seen)
+                notes.append("risk flag: quote not found")
+        return len(seen), notes
 
     def _rules(self, store, report):
         sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n+", report) if s.strip()]

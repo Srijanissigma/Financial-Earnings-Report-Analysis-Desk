@@ -35,6 +35,7 @@ class FactStore:
         self.facts: list[Fact] = []
         self.by_id: dict[str, Fact] = {}
         self.mode = "rules"          # how extraction was done: llm | rules
+        self.condensed = None        # (original chars, chars sent to the LLM)
         self.rejected = 0            # LLM figures that failed verification
         self._n = {"F": 0, "D": 0}
 

@@ -28,3 +28,7 @@ def add_derived(s: FactStore) -> None:
     if inv and yoy:
         s.add("inventory_gap", inv.value - yoy.value, "pp", "Inventory growth minus revenue growth",
               f"Derived: inventory {inv.id} minus revenue growth {yoy.id}", True)
+    rpo = g("rpo_growth")
+    if rpo and yoy:
+        s.add("rpo_gap", rpo.value - yoy.value, "pp", "Backlog growth minus revenue growth",
+              f"Derived: backlog growth {rpo.id} minus revenue growth {yoy.id}", True)

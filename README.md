@@ -107,3 +107,6 @@ python main.py data/Apple_Q4_FY2026_Earnings_Report.txt
 ```
 
 **Project Components:** Agent modules, shared FactStore, calculation and grounding utilities, demo notebook, architecture diagram, append-only execution log and automated tests.
+
+## Recent Updates
+This version adds PDF report support, automatic condensing of long reports so they fit Groq's free-tier request limit, and tolerant quote verification that copes with letters dropped in PDF text. We also added a Streamlit web app (with plain-text tables, because Windows Application Control blocked pandas on our machines), Docker support, a retry for the editor's summary, and rate-limit handling with model fallback. Extraction now also captures full-year revenue guidance and backlog growth, which lets the Risk analyst flag backlog growing more slowly than revenue.
